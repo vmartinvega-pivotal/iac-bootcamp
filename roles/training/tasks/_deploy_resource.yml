@@ -1,0 +1,20 @@
+- name: Apply template
+  set_fact: 
+    deploy_resource__internal__template_content: "{{ lookup('ansible.builtin.template', '{{ item }}') | from_yaml }}"
+
+- name: Create temporary file
+  ansible.builtin.tempfile:
+    state: file
+    suffix: temp
+  register: deploy_resource__internal__temp_file
+  delegate_to: localhost
+
+- name: Save content to temporary file
+  copy:
+    dest: "{{ deploy_resource__internal__temp_file.path }}"
+    content: "{{ deploy_resource__internal__template_content }}"
+  delegate_to: localhost
+
+- name: Apply resource to k8s
+  shell: "kubectl create -f {{ deploy_resource__internal__temp_file.path }}"
+  delegate_to: localhost

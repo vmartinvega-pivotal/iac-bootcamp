@@ -1,0 +1,5 @@
+- name: Deploy wiremock for training purposes
+  ansible.builtin.include_tasks: _deploy_resource.yml
+  loop:
+    - service.yml.j2
+    - deployment.yml.j2
