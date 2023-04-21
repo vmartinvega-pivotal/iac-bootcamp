@@ -1,0 +1,8 @@
+- name: Deploy Jenkins 
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Include Jenkins role
+      ansible.builtin.include_role:
+        name: jenkins

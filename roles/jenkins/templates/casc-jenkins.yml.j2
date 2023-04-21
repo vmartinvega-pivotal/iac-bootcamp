@@ -1,0 +1,75 @@
+credentials:
+  system:
+    domainCredentials:
+    - credentials:
+      - file:
+          fileName: "config"
+          id: "kubeconfig"
+          scope: GLOBAL
+          secretBytes: "{{ kubeconfig_file_bytes }}"
+      - usernamePassword:
+          scope: GLOBAL
+          id: "github"
+          username: "vmartinvega-pivotal"
+          password: "${GITLAB_PASSWORD}"
+          description: "Username/Password for github"
+      - usernamePassword:
+          scope: GLOBAL
+          id: "dockerio"
+          username: "vmartinvega"
+          password: "${DOCKER_PASSWORD}"
+          description: "Username/Password for docker"
+jenkins:
+  agentProtocols:
+  - "Diagnostic-Ping"
+  - "JNLP4-connect"
+  - "OperationsCenter2"
+  - "Ping"
+
+  clouds:
+    - kubernetes:
+        name: "kubernetes"
+        serverUrl: "https://{{ kubernetes_master }}:6443"
+        skipTlsVerify: true
+        credentialsId: "kubeconfig"
+        namespace: "default"
+        jenkinsUrl: "http://jenkins-tcp-port:8080"
+        jenkinsTunnel: "jenkins-jnlp-port:50000"
+        containerCapStr: 42
+        maxRequestsPerHostStr: 64
+        retentionTimeout: 5
+        connectTimeout: 10
+        readTimeout: 20
+
+        templates:
+          - containers:
+            - args: "^${computer.jnlpmac} ^${computer.name}"
+              command: "jenkins-slave"
+              envVars:
+              - envVar:
+                  key: "JAVA_OPTS"
+                  value: "-Xmx700M"
+              image: "jenkinsci/jnlp-slave:latest"
+              livenessProbe:
+                execArgs: "java -version"
+                failureThreshold: 0
+                initialDelaySeconds: 10
+                periodSeconds: 0
+                successThreshold: 0
+                timeoutSeconds: 0
+              name: "jnlp"
+              resourceLimitCpu: "{{ setup_jenkins__limit_cpu }}"
+              resourceLimitMemory: "{{ setup_jenkins__limit_memory }}"
+              resourceRequestCpu: "{{ setup_jenkins__request_cpu }}"
+              resourceRequestMemory: "{{ setup_jenkins__request_memory }}"
+              ttyEnabled: true
+            label: "base"
+            name: "jnlp"
+            nodeUsageMode: NORMAL
+            slaveConnectTimeout: 60
+            slaveConnectTimeoutStr: "60"
+            workspaceVolume:
+              emptyDirWorkspaceVolume:
+                memory: false
+            yaml: "apiVersion: v1\nkind: Pod\nspec:\n  securityContext:\n    runAsUser:\
+              \ 1000" 

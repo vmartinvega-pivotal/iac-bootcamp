@@ -1,0 +1,14 @@
+- name: Deploy Jenkins resources
+  ansible.builtin.include_role:
+    name: common
+  vars:
+    template_content: "{{ lookup('ansible.builtin.template', '{{ item }}') | from_yaml }}"
+  loop:
+    # - pvc-jenkins.yml.j2
+    # - config-git-jenkins.yml.j2
+    # - deployment-jenkins.yml.j2
+    # - service-jenkins.yml.j2
+    # - service-jenkins-webservice.yml.j2
+    # - service-jenkins-tcp-port.yml.j2
+    # - service-jenkins-jnlp-port.yml.j2
+    - secrets-jenkins.yml.j2

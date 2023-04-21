@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  labels:
+    app: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      containers:
+        - name: jenkins
+          image: vmartinvega/jenkins:latest
+          imagePullPolicy: Always
+          env:
+            - name: JAVA_OPTS
+              value: -Djenkins.install.runSetupWizard=false
+            - name: CASC_JENKINS_CONFIG
+              value: "/var/jenkins_home/jenkins-conf.yaml"
+            - name: GITLAB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jenkins-secrets
+                  key: githubsecret
+            - name: DOCKER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jenkins-secrets
+                  key: dockersecret
+          ports:
+            - name: http-port
+              containerPort: 8080
+            - name: jnlp-port
+              containerPort: 50000
+          volumeMounts:
+            - name: jenkins-home
+              mountPath: /var/jenkins_home
+            - name: jenkins-git-config-volume
+              mountPath: /var/jenkins_home/.gitconfig
+              subPath: .gitconfig
+            - name: jenkins-config-volume
+              mountPath: /var/jenkins_home/jenkins-conf.yaml
+              subPath: jenkins-conf.yaml
+      volumes:
+        - name: jenkins-home
+          persistentVolumeClaim:
+            claimName: jenkins-localhost-pvc
+        - name: jenkins-git-config-volume
+          configMap:
+            name: jenkins-git-config
+            items:
+            - key: .gitconfig
+              path: .gitconfig
+        - name: jenkins-config-volume
+          configMap:
+            name: jenkins-conf
+            items:
+            - key: jenkins-conf.yaml
+              path: jenkins-conf.yaml

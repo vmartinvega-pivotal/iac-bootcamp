@@ -1,0 +1,21 @@
+# - name: Apply template
+#   set_fact: 
+#     template_content: "{{ lookup('ansible.builtin.template', '{{ item }}') | from_yaml }}"
+
+- name: Create temp file
+  ansible.builtin.tempfile:
+    state: file
+    suffix: temp
+  register: temp_file
+  delegate_to: localhost
+
+- name: Save content to file
+  ansible.builtin.copy:
+    dest: "{{ temp_file.path }}"
+    content: "{{ template_content }}"
+  delegate_to: localhost
+
+- name: Apply resource
+  ansible.builtin.shell: >-
+    kubectl create -f {{ temp_file.path }}
+  delegate_to: localhost
