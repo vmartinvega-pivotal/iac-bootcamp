@@ -1,0 +1,8 @@
+- name: Deploy Nfs for K8s 
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Include Nfs role
+      ansible.builtin.include_role:
+        name: nfs

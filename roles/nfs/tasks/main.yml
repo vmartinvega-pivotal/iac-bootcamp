@@ -1,0 +1,79 @@
+- name: Configure a NFS server for persistent k8s storage
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    nfs_user: "{{ lookup('env','USER') }}"
+    nfs_server: 127.0.0.1
+    storage_class: nfs-csi
+    nfs_csi_url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/deploy/install-driver.sh
+  tasks:
+    - name: Set nfs share
+      set_fact:
+        nfs_share: "/home/{{ nfs_user }}/nfs_shares_for_kubernetes"
+
+    - name: Create a mountable directory
+      file:
+        path: "{{ nfs_share }}" 
+        state: directory
+        owner: "{{ nfs_user }}"
+        group: "{{ nfs_user }}"
+        mode: '0775'
+
+    - name: get uid for user
+      ansible.builtin.shell: >-
+        id -u {{ nfs_user }}
+      register: uid
+      become: yes
+      
+    - name: get guid for user
+      ansible.builtin.shell: >-
+        id -g {{ nfs_user }}
+      register: guid
+      become: yes
+
+    - name: Copy exports file
+      ansible.builtin.copy:
+        dest: /etc/exports
+        owner: root
+        group: root
+        content: >-
+          {{ nfs_share }} *(rw,sync,no_root_squash,no_subtree_check,all_squash,anonuid={{ uid.stdout }},anongid={{ guid.stdout }})
+        mode: 0644
+      become: yes
+
+    - name: Enable and start services
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+        masked: no
+        daemon_reload: yes
+      loop:
+        - rpcbind
+        - nfs-server
+      become: yes
+
+    - name: export all shares
+      ansible.builtin.shell: >-
+        exportfs -arv
+      become: yes
+
+    - name: Install csi nfs driver
+      ansible.builtin.shell: >-
+        curl -skSL {{ nfs_csi_url }} | bash -s master --
+      delegate_to: localhost
+
+    - name: Deploy Nfs resources
+      ansible.builtin.include_role:
+        name: common
+      vars:
+        template_content: "{{ lookup('ansible.builtin.template', '{{ item }}') | from_yaml }}"
+      loop:
+        - storageclass-nfs.yml.j2
+
+    - name: Set the storage class
+      ansible.builtin.shell: >-
+        kubectl patch storageclass {{ storage_class }} -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+      delegate_to: localhost
+
