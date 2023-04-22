@@ -1,12 +1,50 @@
-FROM ansible/ansible
+FROM docker.io/redhat/ubi8:latest
 
-LABEL maintainer="Vicente Martin Vega"
+ARG working_dir=/bootcamp
 
-COPY --chown=0:0 requirements.txt .
+# Ensure locale to installed files
+ENV LC_ALL C.utf8
+ENV LANG C.utf8
+ENV LANGUAGE C.utf8
 
-RUN python3 -m pip install -r "requirements.txt"  && \
+RUN yum install -y \
+        sudo \
+        wget \
+        rsync \
+        openssl \
+        unzip xz \
+	    git \
+        unzip \
+        net-tools \
+        nano && \
+    yum clean all -y
+
+# Create Workdir
+RUN mkdir -p "${working_dir}" && \
+    chgrp -R 0 "${working_dir}" && \
+    chmod -R g=u "${working_dir}"
+
+# Python
+RUN yum install -y python39 python39-devel && \
+    yum clean all -y
+
+# Install Ansible and required modules using requirements.txt
+# to let pip handle modules dependencies in one go
+ENV ANSIBLE_PYTHON_INTERPRETER="/usr/bin/python3"
+ENV ANSIBLE_FORCE_COLOR="True"
+COPY --chown=0:0 requirements.txt "${working_dir}"
+RUN python3 -m pip install -r "${working_dir}/requirements.txt"  && \
     mkdir /.cache && \
     chgrp -R 0 /.cache && \
     chmod -R g=u /.cache
 
-RUN ansible-galaxy collection install kubernetes.core
+# Ansible collections
+RUN ansible-galaxy collection install \
+        community.general \
+        kubernetes.core \
+        -p /usr/share/ansible/collections && \
+    mkdir /.ansible && \
+    chgrp -R 0 /.ansible && \
+    chmod -R g=u /.ansible
+
+WORKDIR "${working_dir}"
