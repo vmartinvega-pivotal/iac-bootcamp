@@ -1,0 +1,13 @@
+- name: Deploy Nfs for persistent K8s storage
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    nfs_user: "{{ lookup('env','USER') }}"
+    nfs_server: 127.0.0.1
+    storage_class: nfs-csi
+    nfs_csi_url: https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/deploy/install-driver.sh
+  tasks:
+    - name: Include Nfs role
+      ansible.builtin.include_role:
+        name: nfs
