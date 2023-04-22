@@ -10,13 +10,13 @@ credentials:
       - usernamePassword:
           scope: GLOBAL
           id: "github"
-          username: "vmartinvega-pivotal"
+          username: "{{ github_username }}"
           password: "${GITLAB_PASSWORD}"
           description: "Username/Password for github"
       - usernamePassword:
           scope: GLOBAL
           id: "dockerio"
-          username: "vmartinvega"
+          username: "{{ docker_username }}"
           password: "${DOCKER_PASSWORD}"
           description: "Username/Password for docker"
 jenkins:
@@ -58,10 +58,10 @@ jenkins:
                 successThreshold: 0
                 timeoutSeconds: 0
               name: "jnlp"
-              resourceLimitCpu: "{{ setup_jenkins__limit_cpu }}"
-              resourceLimitMemory: "{{ setup_jenkins__limit_memory }}"
-              resourceRequestCpu: "{{ setup_jenkins__request_cpu }}"
-              resourceRequestMemory: "{{ setup_jenkins__request_memory }}"
+              resourceLimitCpu: "2.0"
+              resourceLimitMemory: "2Gi"
+              resourceRequestCpu: "2.0"
+              resourceRequestMemory: "2Gi"
               ttyEnabled: true
             label: "base"
             name: "jnlp"

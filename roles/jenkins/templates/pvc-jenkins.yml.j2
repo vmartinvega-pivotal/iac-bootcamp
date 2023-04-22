@@ -4,7 +4,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: jenkins-localhost-pvc
 spec:
-  storageClassName: "{{ setup_jenkins__storage_class_name }}"
+  storageClassName: "{{ storage_class }}"
   accessModes:
     - ReadWriteMany
   resources:

@@ -2,6 +2,13 @@
   hosts: localhost
   connection: local
   gather_facts: false
+  vars:
+    jenkins_user: "{{ lookup('env','USER') }}"
+    storage_class: nfs-csi
+    github_username: vmartinvega-pivotal
+    github_email: vicente.martin.vega@gmail.com
+    docker_username: vmartinvega
+    kubernetes_master: 127.0.0.1
   tasks:
     - name: Include Jenkins role
       ansible.builtin.include_role:

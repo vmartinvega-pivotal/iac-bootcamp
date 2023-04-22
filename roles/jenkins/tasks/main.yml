@@ -3,7 +3,8 @@
     user_folder: "/home/{{ jenkins_user }}"
 
 - name: Get bytes for kubeconfig
-  shell: "cat {{ user_folder }}/.kube/config | base64 --wrap=0"
+  ansible.builtin.shell: >-
+    cat {{ user_folder }}/.kube/config | base64 --wrap=0
   register: kubeconfig
   delegate_to: localhost
 
@@ -40,10 +41,10 @@
     template_content: "{{ lookup('ansible.builtin.template', '{{ item }}') | from_yaml }}"
   loop:
     - pvc-jenkins.yml.j2
-    # - config-git-jenkins.yml.j2
-    # - deployment-jenkins.yml.j2
-    ##- service-jenkins.yml.j2
-    # - service-jenkins-webservice.yml.j2
-    # - service-jenkins-tcp-port.yml.j2
-    # - service-jenkins-jnlp-port.yml.j2
-    # - secrets-jenkins.yml.j2
+    - config-git-jenkins.yml.j2
+    - deployment-jenkins.yml.j2
+    - service-jenkins.yml.j2
+    - service-jenkins-webservice.yml.j2
+    - service-jenkins-tcp-port.yml.j2
+    - service-jenkins-jnlp-port.yml.j2
+    - secrets-jenkins.yml.j2
