@@ -1,18 +1,17 @@
-# Metrics Kubernetes Configuration
+# IaC Bootcamp
 
-Kubernetes configuration for the deployment of the ALM Multicloud Metrics.
+This repo contains all info needed to run the lab3
 
-## Jira Mock
-* **Build**. Run the following command inside the folder with the Dockerfile
+## Configure the VM with the right tools
+* Deploy **8ks**
 ```
-docker build -t registry.global.ccc.srvb.can.paas.cloudcenter.corp/c3alm-sgt/wiremock-jira .
+ansible-playbook -i 127.0.0.1, deploy-8ks.yml
 ```
-* **Push**. Run the following command inside the folder with the Dockerfile
+* Deploy **nfs** and csi implementation
 ```
-docker push registry.global.ccc.srvb.can.paas.cloudcenter.corp/c3alm-sgt/wiremock-jira
+ansible-playbook -i 127.0.0.1, deploy-nfs.yml
 ```
-
-* **Run locally**.
+* Deploy **Jenkins**.
 ```
-docker run -it --rm -p 8080:8080 registry.global.ccc.srvb.can.paas.cloudcenter.corp/c3alm-sgt/wiremock-jira
+ansible-playbook -i 127.0.0.1, deploy-jenkins.yml
 ```
