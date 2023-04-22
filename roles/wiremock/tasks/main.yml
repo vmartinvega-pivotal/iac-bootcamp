@@ -1,0 +1,8 @@
+- name: Deploy Wiremock for training purposes
+  ansible.builtin.include_role:
+    name: common
+  vars:
+    template_content: "{{ lookup('ansible.builtin.template', '{{ item }}') | from_yaml }}"
+  loop:
+    - service.yml.j2
+    - deployment.yml.j2

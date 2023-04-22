@@ -1,0 +1,12 @@
+- name: Deploy Nfs for persistent K8s storage
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    app_name: wiremock
+    app_image: vmartinvega/wiremock-training:latest
+    app_port: 32100
+  tasks:
+    - name: Include Wiremock role
+      ansible.builtin.include_role:
+        name: wiremock
