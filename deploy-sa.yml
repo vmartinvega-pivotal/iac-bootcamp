@@ -1,0 +1,17 @@
+- name: Deploy wiremock
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    service_account: bootcamp
+    namespace: default
+    state_path: state/state.json
+  tasks:
+    # - name: Read state
+    #   set_fact:
+    #     state: "{{lookup('ansible.builtin.file', '{{ state_path }}') | from_json }}"
+    # - ansible.builtin.debug:
+    #     msg: "{{ state.port }}"
+    - name: Include 8ks role
+      ansible.builtin.include_role:
+        name: k8s

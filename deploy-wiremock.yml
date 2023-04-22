@@ -1,4 +1,4 @@
-- name: Deploy Nfs for persistent K8s storage
+- name: Deploy/Undeploy wiremock
   hosts: localhost
   gather_facts: false
   connection: local

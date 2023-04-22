@@ -1,0 +1,27 @@
+- name: Create Service Account
+  shell: >-
+    kubectl -n {{ namespace }} create serviceaccount {{ service_account }}
+
+- name: Create Cluster Role
+  shell: >-
+    kubectl create clusterrolebinding clusterrolebinding-bootcamp --clusterrole=cluster-admin --serviceaccount={{ namespace }}:{{ service_account }}
+
+- name: Create Secret for Service Account
+  ansible.builtin.include_role:
+    name: common
+  vars:
+    template_content: "{{ lookup('ansible.builtin.template', '{{ item }}') | from_yaml }}"
+  loop:
+    - service-account.yml.j2
+
+- name: Get Token 
+  shell: >-
+    kubectl -n {{ namespace }} get secret secret-{{ service_account }} -o jsonpath='{.data.token}' | base64 --decode
+  register: token_output
+
+- name: Set fact for token
+  set_fact:
+    token: "{{ token_output.stdout }}"
+
+- debug:
+    var: token
