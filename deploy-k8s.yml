@@ -15,26 +15,30 @@
           ansible.builtin.shell: >-
             kubeadm init --kubernetes-version={{ kubernetes_version }} --pod-network-cidr={{ kubernetes_network }}
           become: true
-  
+
+        - name: Set user folder
+          set_fact:
+            user_folder: "/home/{{ user }}"
+
+        - name: Set path for .kube folder
+          set_fact:
+            home_kube: "{{ user_folder }}/.kube"
+
         - name: Create .kube folder
           ansible.builtin.file:
-            path: ".kube"
+            path: "{{ home_kube }}"
             state: directory
             mode: '0755'
 
         - name: Copy kubernetes configuration file
           ansible.builtin.shell: >-
-            cp -i /etc/kubernetes/admin.conf .kube/config
+            cp -i /etc/kubernetes/admin.conf {{ home_kube }}/config
           become: true
 
         - name: Change permissions for kubernetes configuration files
           ansible.builtin.shell: >-
-            chown -R {{ user }}:{{ user }} .kube
+            chown -R {{ user }}:{{ user }} {{ home_kube }}
           become: true
-
-        - name: Set user folder
-          set_fact:
-            user_folder: "/home/{{ user }}"
 
         - name: Download file from a file path
           ansible.builtin.get_url:
