@@ -8,6 +8,8 @@
     user: "{{ lookup('env','USER') }}"
     node_name: k8s
     calico_url: https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
+    service_account: bootcamp
+    namespace: default
   tasks:
     - name: Include k8s role
       ansible.builtin.include_role:
