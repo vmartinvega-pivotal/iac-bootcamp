@@ -1,8 +1,46 @@
-- name: Deploy Wiremock for training purposes
-  ansible.builtin.include_role:
-    name: common
-  vars:
-    template_content: "{{ lookup('ansible.builtin.template', '{{ item }}') | from_yaml }}"
-  loop:
-    - service.yml.j2
-    - deployment.yml.j2
+- name: Create Deployment
+  kubernetes.core.k8s:
+    state: "{{ state.state }}"
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: "{{ app_name }}"
+        labels:
+          app: "{{ app_name }}"
+        namespace: "{{ namespace }}"
+      spec:
+        replicas: "{{ replicas }}"
+        selector:
+          matchLabels:
+            app: "{{ app_name }}"
+        template:
+          metadata:
+            labels:
+              app: "{{ app_name }}"
+          spec:
+            containers:
+              - name: "{{ app_name }}"
+                image: "{{ app_image }}"
+                imagePullPolicy: Always
+                ports:
+                  - name: wiremock-port
+                    containerPort: 8080
+
+- name: Create Service
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ app_name }}"
+        namespace: "{{ namespace }}"
+      spec:
+        type: NodePort
+        selector:
+          app: "{{ app_name }}"
+        ports:
+        - nodePort: "{{ app_port }}"
+          port: 8000
+          targetPort: 8080

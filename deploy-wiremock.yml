@@ -6,7 +6,21 @@
     app_name: wiremock
     app_image: vmartinvega/wiremock-training:latest
     app_port: 32100
+    namespace: default
+    replicas: 1
   tasks:
+    # - name: Get Token 
+    #   shell: >-
+    #     kubectl get secret secret-bootcamp -o jsonpath='{.data.token}' | base64 --decode
+    #   register: token
+
+    # - debug:
+    #     var: token.stdout
+    
+    - name: Read state
+      set_fact:
+        state: "{{lookup('ansible.builtin.file', 'state/state.json') | from_json }}"
+
     - name: Include Wiremock role
       ansible.builtin.include_role:
         name: wiremock
