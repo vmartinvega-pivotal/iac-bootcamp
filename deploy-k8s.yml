@@ -9,63 +9,6 @@
     node_name: k8s
     calico_url: https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
   tasks:
-    - name: Init k8s for bootcamp
-      block:
-        - name: Init kubeadm
-          ansible.builtin.shell: >-
-            kubeadm init --kubernetes-version={{ kubernetes_version }} --pod-network-cidr={{ kubernetes_network }}
-          become: true
-
-        - name: Set user folder
-          set_fact:
-            user_folder: "/home/{{ user }}"
-
-        - name: Set path for .kube folder
-          set_fact:
-            home_kube: "{{ user_folder }}/.kube"
-
-        - name: Create .kube folder
-          ansible.builtin.file:
-            path: "{{ home_kube }}"
-            state: directory
-            mode: '0755'
-
-        - name: Copy kubernetes configuration file
-          ansible.builtin.shell: >-
-            cp -i /etc/kubernetes/admin.conf {{ home_kube }}/config
-          become: true
-
-        - name: Change permissions for kubernetes configuration files
-          ansible.builtin.shell: >-
-            chown -R {{ user }}:{{ user }} {{ home_kube }}
-          become: true
-
-        - name: Download file from a file path
-          ansible.builtin.get_url:
-            url: "{{ calico_url }}"
-            dest: /tmp/calico.yaml
-
-        - name: Replace network into the calico descriptor
-          ansible.builtin.replace:
-            path: "/tmp/calico.yaml"
-            regexp: '(.*)\#(.*)-(.*)name:(.*)CALICO_IPV4POOL_CIDR(.*)'
-            replace: '\1- name: CALICO_IPV4POOL_CIDR\4'
-
-        - name: Replace network into the calico descriptor
-          ansible.builtin.replace:
-            path: "/tmp/calico.yaml"
-            regexp: '(.*)\#(.*)value:(.*)\"192\.168\.0\.0\/16\"(.*)'
-            replace: '\1  value: {{ kubernetes_network }}\4'
-
-        - name: Install network for kubernetes
-          ansible.builtin.shell: >- 
-            kubectl apply -f /tmp/calico.yaml
-
-        - name: Patch node to remove all taints
-          ansible.builtin.shell: >-
-            kubectl patch node {{ node_name }} -p '{"spec":{"taints":[]}}'
-
-        - name: Wait for all k8s nodes to be ready
-          ansible.builtin.shell: >-
-            kubectl wait --for=condition=Ready nodes --all --timeout=600s
-      delegate_to: localhost
+    - name: Include k8s role
+      ansible.builtin.include_role:
+        name: k8s
