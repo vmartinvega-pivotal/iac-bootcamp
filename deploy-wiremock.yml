@@ -9,14 +9,14 @@
     namespace: default
     replicas: 1
   tasks:
-    # - name: Get Token 
-    #   shell: >-
-    #     kubectl get secret secret-bootcamp -o jsonpath='{.data.token}' | base64 --decode
-    #   register: token
+    - name: Set fact for token
+      set_fact:
+        token: "{{ lookup('env','K8S_CREDS_PSW') }}"
 
-    # - debug:
-    #     var: token.stdout
-    
+    - name: Debug token
+      debug:
+        var: token
+
     - name: Read state
       set_fact:
         state: "{{lookup('ansible.builtin.file', 'state/state.json') | from_json }}"

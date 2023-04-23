@@ -1,5 +1,7 @@
 - name: Create Deployment
   kubernetes.core.k8s:
+    api_key: "{{ token }}"
+    validate_certs: false
     state: "{{ state.state }}"
     definition:
       apiVersion: apps/v1
@@ -29,7 +31,9 @@
 
 - name: Create Service
   kubernetes.core.k8s:
-    state: present
+    state: "{{ state.state }}"
+    api_key: "{{ token }}"
+    validate_certs: false
     definition:
       apiVersion: v1
       kind: Service

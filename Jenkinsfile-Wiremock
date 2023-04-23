@@ -8,6 +8,10 @@ pipeline {
   }
   stages {
     stage('Deploy Wiremock to 8ks') {
+      environment {
+        K8S_CREDS = credentials('sa_k8s')  // A jenkins credentials (username/password) is expected in jenkins (craete it before running)
+        K8S_AUTH_HOST="https://192.168.1.202:6443"
+      }
       steps {
         container('ansible') {  
           sh "ansible-playbook -i 127.0.0.1, deploy-wiremock.yml"
