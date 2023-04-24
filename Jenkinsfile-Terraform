@@ -6,15 +6,33 @@ pipeline {
       yamlFile 'pods/terraform-pod.yml'  // path to the pod definition relative to the root of our project 
     }
   }
+  environment {
+    ACCESS_KEY_ID_CREDS = credentials('access_key_id')
+    SECRET_ACCESS_KEY_CREDS = credentials('secret_access_key')
+    AWS_ACCESS_KEY_ID= "$ACCESS_KEY_ID_CREDS_PSW"
+    AWS_SECRET_ACCESS_KEY= "$SECRET_ACCESS_KEY_CREDS_PSW"
+    AWS_DEFAULT_REGION="eu-central-1"
+  }
   stages {
-    stage('Deploy Instance to AWS With Terraform') {
-      environment {
-        K8S_CREDS = credentials('sa_k8s')
-        ACCESS_KEY_ID_CREDS = credentials('access_key_id')
-        SECRET_ACCESS_KEY_CREDS = credentials('secret_access_key')
-        AWS_ACCESS_KEY_ID= "$ACCESS_KEY_ID_CREDS_PSW"
-        AWS_SECRET_ACCESS_KEY= "$SECRET_ACCESS_KEY_CREDS_PSW"
-        AWS_DEFAULT_REGION="eu-central-1"
+    stage('Parameters') {
+        steps {
+            script { 
+                properties([
+                    parameters([
+                        choice(
+                            choices: ['apply', 'destroy'], 
+                            name: 'action'
+                        )
+                    ])
+                ])
+            }
+        }
+    }
+    stage('Create Instance to AWS') {
+      when {
+        expression { 
+          return params.action == 'apply'
+        }
       }
       steps {
         container('terraform') {  
@@ -22,5 +40,18 @@ pipeline {
         }
       }
     }
+    stage('Destroy Instance in AWS') {
+      when {
+        expression { 
+          return params.action == 'destroy'
+        }
+      }
+      steps {
+        container('terraform') {  
+          sh "cd terraform && terraform init && terraform destroy -state=/home/terraform/main.tfstate -auto-approve"
+        }
+      }
+    }
   }
 }
+    
