@@ -6,3 +6,10 @@ spec:
       image: docker.io/vmartinvega/bootcamp-terraform:latest
       command: ["tail", "-f", "/dev/null"]
       imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - name: terraform-volume
+          mountPath: /home/terraform
+  volumes:
+    - name: terraform-volume
+      persistentVolumeClaim:
+        claimName: terraform-volume
