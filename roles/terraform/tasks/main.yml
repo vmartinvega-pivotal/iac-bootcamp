@@ -1,0 +1,17 @@
+- name: Create PVC
+  kubernetes.core.k8s:
+    state: present
+    validate_certs: false
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: "{{ pvc_name }}"
+        namespace: "{{ namespace }}"
+      spec:
+        storageClassName: "{{ storage_class }}"
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 5Gi

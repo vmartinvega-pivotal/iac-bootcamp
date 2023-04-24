@@ -1,0 +1,12 @@
+- name: Deploy Terraform PVC
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars:
+    pvc_name: terraform-volume
+    storage_class: nfs-csi
+    namespace: default
+  tasks:
+    - name: Include Terraform role
+      ansible.builtin.include_role:
+        name: terraform
