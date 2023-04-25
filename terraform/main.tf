@@ -52,20 +52,20 @@ resource "aws_security_group" "allow_http" {
   }
 }
 
-resource "aws_instance" "webserver" {
+resource "aws_instance" "bootcamp" {
   ami                    = "ami-047e03b8591f2d48a"
   instance_type          = "t2.micro"
   key_name               = "aws_key"
   vpc_security_group_ids 	 = [aws_security_group.allow_ssh.name,aws_security_group.allow_http.name]
 
   tags = {
-    Name = "webserver"
+    Name = "bootcamp"
   }
 }
 
 output "instance_fqdn" {
-  value = aws_instance.webserver.public_dns
+  value = aws_instance.bootcamp.public_dns
 }
 output "instance_ip_addr" {
-  value = aws_instance.webserver.public_ip
+  value = aws_instance.bootcamp.public_ip
 }
