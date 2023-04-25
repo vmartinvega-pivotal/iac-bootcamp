@@ -1,18 +1,20 @@
 FROM docker.io/redhat/ubi8:latest
 
+# Install some tools
 RUN yum install -y \
-	    git \
+	git \
         curl \
         unzip \
         net-tools \
         yum-utils
 
-# Install repo for terraform
+# Add repo for terraform
 RUN yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
 
 # Install terraform
 RUN yum -y install terraform
 
+# Install aws client
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 RUN unzip awscliv2.zip
 RUN ./aws/install
